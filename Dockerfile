@@ -1,4 +1,4 @@
-FROM rstudio/plumber:v1.0.0
+FROM rocker/tidyverse:latest
 
 RUN apt-get update && apt-get install -y \
 libxml2-dev \
@@ -7,17 +7,21 @@ libsodium-dev \
 libcurl4-openssl-dev \
 libssl-dev \
 libfreetype6 \
-libfreetype6-dev 
+libfreetype6-dev \
+libfontconfig1 \
+libfontconfig1-dev
+
+ 
 
 RUN mkdir /home/DSPD_project
 
-COPY api /home/DSPD_project/api
+COPY Web_Scrapper /home/DSPD_project/Web_Scrapper
 
-WORKDIR /home/DSPD_project/api
+WORKDIR /home/DSPD_project/Web_Scrapper
 
-#RUN R -e 'install.packages(c("plumber"))'
+RUN tar xvjf phantomjs-2.1.1-linux-x86_64.tar.bz2 -C /usr/local/share/
 
-EXPOSE 80
+RUN ln -s /usr/local/share/phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/local/bin
 
-ENTRYPOINT ["R", "-e", \
-    "pr <- plumber::plumb('/home/DSPD_project/api/forecast_2.R'); pr$run(host='0.0.0.0', port=80, swagger = TRUE)"]
+
+CMD R -e "source('WS.R')"
